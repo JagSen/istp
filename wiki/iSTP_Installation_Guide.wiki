@@ -6,9 +6,9 @@
 As this is far from a production solution we use nothing more than XAMPP as a quick and easy way of getting Apache, PHP and MySQL up and running - this is an exercise in learning to program applications, not how to get the base software working on Vista!
 
 Curretnly using XAMPP 1.6.7 which sees us using 
-  *Apache HTTPD 2.2.9
-  *MySQL 5.0.51b
-  *PHP 5.2.6
+  * Apache HTTPD 2.2.9
+  * MySQL 5.0.51b
+  * PHP 5.2.6
 
 = Details =
 
