@@ -165,6 +165,8 @@ Seems our bigint knowledge from mysql world screwed us up on the Ruby/Rails worl
 
 et viola
 
+Note to self, [http://dizzy.co.uk/ruby_on_rails/cheatsheets/rails-migrations this] documents the field types which can be used in the db creation script.
+
 So now we return to add some simple validation by editing `\name_of_application\app\models\trade.rb` and adding 
 {{{
 validates_presence_of :trade_id
@@ -188,4 +190,30 @@ rake db:migrate
 }}}
 and we are sorted, phew.
 
-Except we are not out of the woods.... Ruby/Rails was helpful to us earlier and set up the defualt views of our data... and that included a field called trade_id... which we just removed... so now all our forms error when we try and commit an action, like adding a record.  So we manually edit the views in `\app\views\trades` and take the time to remove the delete option - this is finance, you can't just go destroying the evidence! Yeah I know we need to be able to cancel a trade booked in error, but we can come to that later.  I was very tempted to remove the edit option at this stage for similar audit concerns, but we'll elt it go for now.
+Except we are not out of the woods.... Ruby/Rails was helpful to us earlier and set up the defualt views of our data... and that included a field called trade_id... which we just removed... so now all our forms error when we try and commit an action, like adding a record.  So we manually edit the views in `\app\views\trades` and take the time to remove the delete option - this is finance, you can't just go destroying the evidence! Yeah I know we need to be able to cancel a trade booked in error, but we can come to that later.  I was very tempted to remove the edit option at this stage for similar audit concerns, but we'll let it go for now.
+
+Having got the basics working, adding new records, displaying our records, editing our records it's time to create another table.  Given that we have a trade table with counterparty_id in it, it would make sense add to add the counterparty table, views, models etc. don't you think?
+
+{{{
+ruby script/generate scaffold counterparty name_long:string name_medium:string name_short:string
+}}}
+and rake the ground to actually see something grow from these seeds, i.e the physical table creation in the database
+{{{
+rake db:migrate
+}}}
+
+Hopefully this was all a bit smoother than our first trade effort
+
+
+Note to self, learn about doccumenting the aplication using `rake doc:app` the results of which can be accessed through`\istp\doc\app\index.html`
+
+Now we have a link between a trade and a counterparty we should enforce that relationship to prevent a trade been entered with a counterpart we do not know about.  This is done in the model
+
+Other model validations include translating database restrictions into Ruby/Rails - no point stressing the db if we know it will fail :
+{{{
+NOT NULL - validates_presence_of (including belongs_to associations)
+Numbers - validates_numericality_of (including :only_integer => true)
+String lengths - validates_length_of
+Single-column unique indexes - validates_uniqueness_of
+Multi-column unique indexes -validates_uniqueness_of with scope
+}}}
