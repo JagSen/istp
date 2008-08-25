@@ -1,10 +1,10 @@
-#How we built iSTP
-= Introduction =
+=How we built iSTP=
+== Introduction ==
 
 iSTP was used to learn how to write scalable applications.  This page records for the future how we got from nowhere to somewhere!
 
 
-= Details =
+== Details ==
 
 Having installed Apache, MySQL, Ruby, Rail we were ready to begin building the application.
 
@@ -22,7 +22,7 @@ def index
   render :text => "Hello World"
 end 
 }}}
-Now pointing our browser to [http://localhost:3000/istp http://localhost:3000/istp] produce the desired simple output :)
+Now pointing our browser to [http://localhost:3000/trades http://localhost:3000/trades] produce the desired simple output :)
 
 Re edit \istp\app\controllers\istp_controller.rb and reomve the render line as we know everything is working just fine.
 
@@ -110,19 +110,22 @@ and the issue was never logged again, hoorah.
 
 Next, having been clobbered so many times so early on living on the bleeding edge, we took time out to [http://fairleads.blogspot.com/2007/12/rails-20-and-scaffolding-step-by-step.html read up] on the changes from v1.n to v2.n in attempt to avoid further frustration.
 
-As a result of this, we decided to start again (!) as we had done so little and wanted to make sure we understood what we had taken on board... so ggodby applicatin folder and databse, nice knowing you....not.
+As a result of this, we decided to start again (!) as we had done so little and wanted to make sure we understood what we had taken on board... so goodby applicatin folder and databse, nice knowing you....not.
 
 
 =Idiots guide to building an application with Ruby/Rails, aka avoding the pitfalls of out of date tutorials and negating the need for much Googling!=
 Create an application framework by issuing the command
 {{{
-rails name_of_application
+rails -d mysql name_of_application
 }}}
+Note since v2.n its advisable to specify the -d database type option
+
+
 Get ready to do some work
 {{{
 cd name_of_application
 }}}
-Get you dev/tes/prod databases ready by editing the `\name_of_application\config\database.yml` file and then issuing the command
+Get you dev/test/prod databases ready by editing the `\name_of_application\config\database.yml` file and then issuing the command
 {{{
 rake db:create:all
 }}}
@@ -133,3 +136,56 @@ ruby script/server
 and point your browser at `http://localhost:3000` to see it working.
 
 Hey pesto, so far so good.
+
+Now, rather than building the database outside of Ruby/Rails and telling it oabout it, as of v2 we describe it in Ruby/Rail and get it to build it for us.  For those used to using gui tools to build the databse, this can seem a bit log winded, but we'll forgive it for now.
+
+To start to build the holder of data for our trade form we command
+{{{
+ruby script/generate scaffold trade trade_id:bigint trade_date:date counterparty_id:mediumint
+}}}
+
+Note this time, we followed advise, started simple, and only added a few fields... as the old tutorials tell us, you can build eaily on success later!
+
+Ruby/Rails has created `\name_of_application\db\migrate\20080825122105_create_trades.rb` so now we are in a position (if we wanted) to distribute the release knowing that as well as the application, we can confidently get users to build the database structure too.
+
+To prove it works, we can then apply this script and see it in the database schema
+{{{
+rake db:migrate
+}}}
+
+Oh bugger, we screwed up again.
+{{{
+== 20080825122105 CreateTrades: migrating =====================================
+-- create_table(:trades)
+rake aborted!
+undefined method `bigint' for #<ActiveRecord::ConnectionAdapters::TableDefinition:0x4d65b24>
+}}}
+
+Seems our bigint knowledge from mysql world screwed us up on the Ruby/Rails world (I guess the mediumint would do the same)... we'll work on that more later, for now we'll make do with an integer.  We don't know any better so modify the `\name_of_application\db\migrate\20080825122105_create_trades.rb` file directly (probably not advisable, but hey, we learning) and run `rake` again.
+
+et viola
+
+So now we return to add some simple validation by editing `\name_of_application\app\models\trade.rb` and adding 
+{{{
+validates_presence_of :trade_id
+validates_presence_of :trade_date
+validates_presence_of :counterparty_id
+}}}
+
+This could have been done in one line like `validates_presence_of :trade_id, :trade_date, :counterparty_id` but I think its easier to read as it is.
+
+Happened to look at the table hat the rake process created... another mistake.  If you learn from your errors we are dong a whole lot of learning today.  I recall that v1.n automatically creates an ID field to ensure uniqure records are used in the CRUD queries...so we don't need the trade_id field.
+
+Again, an edit to the `\name_of_application\db\migrate\20080825122105_create_trades.rb` file to remove this unnecessary field, and a modification of the `\app\models\trade.rb` file to remove the requirement for data to be passed.
+
+We then need to get our database in shape so we go back to where we started
+{{{
+rake db:migrate VERSION=0
+}}}
+and then rebuild
+{{{
+rake db:migrate
+}}}
+and we are sorted, phew.
+
+Except we are not out of the woods.... Ruby/Rails was helpful to us earlier and set up the defualt views of our data... and that included a field called trade_id... which we just removed... so now all our forms error when we try and commit an action, like adding a record.  So we manually edit the views in `\app\views\trades` and take the time to remove the delete option - this is finance, you can't just go destroying the evidence! Yeah I know we need to be able to cancel a trade booked in error, but we can come to that later.  I was very tempted to remove the edit option at this stage for similar audit concerns, but we'll elt it go for now.
