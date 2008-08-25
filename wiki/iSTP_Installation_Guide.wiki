@@ -1,15 +1,25 @@
-#summary One-sentence summary of this page.
 #labels install
+#How to install iSTP
 
 = Introduction =
 
 As this is far from a production solution we use nothing more than XAMPP as a quick and easy way of getting Apache, PHP and MySQL up and running - this is an exercise in learning to program applications, not how to get the base software working on Vista!
 
-Curretnly using XAMPP 1.6.7 which sees us using 
+Curretnly using [http://www.apachefriends.org/download.php?xampp-win32-1.6.7-installer.exe XAMPP 1.6.7] which sees us using 
   * Apache HTTPD 2.2.9
   * MySQL 5.0.51b
   * PHP 5.2.6
 
+On top of that we use
+  * [http://rubyforge.org/frs/download.php/29263/ruby186-26.exe Ruby 1.8.6-26 Final Release]
+
 = Details =
 
-Fuller installation details to follow
+Fuller installation details to follow but for now
+
+  * Install XAMPP - we ue c:\XAMPP to get over Vista related security issues
+  * Install Ruby - we install to c:\XAMPP\ruby to keep all the application files together
+  * Install Rails by opening a command prompt and issuing the following command and acknowledge Yes to install any dependencies
+    * gem install rails
+
+That's it... for now.  This project is too early in its life to be packaged up as a Gem so when the first bit of code is ready it will be a .zip that you can just copy over by hand, along with the MySql database creation script.
