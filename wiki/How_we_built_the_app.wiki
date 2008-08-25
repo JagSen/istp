@@ -85,12 +85,51 @@ Restart the server process on cmd session 1.
 Now we are are in a position to use the next RAD part of Ruby/Rails called SCAFFOLD.  This will build for us a VERY quick trade insert form for proof on concpet.
 To do this edit the file `\istp\app\controllers\istp_controller.rb` again, this time adding the command `scaffold :post`
 
-Wanting to see the New Post functionality appear in our web browser, off we wnet to try it out.
+Wanting to see the New Post functionality appear in our web browser, off we went to try it out.
 
 Hmmm, *BANG* she blew :(  What was wrong? Doh, the workmen hadn't delivered the scaffolding so we weren't in a position to use it! Back in our second cmd prompt we issued a call to go and get the necessary goods `ruby plugin install scaffolding` and restarted the server again.
 
-Ready for a big smile on our faces we were again disappointed to see `undefined method ```paginate'` error when refreshing our browser.  This wasn't at all expected - no mention of it in the tutorals observed that gave us the idea to try this programming route in the first place :(
+Ready for a big smile on our faces we were again disappointed to see `undefined method ```paginate'` error when refreshing our browser.  This wasn't at all expected - no mention of it in the tutorials observed that gave us the idea to try this programming route in the first place :(
 
-After a little Googling it turns out that being on the bleedig edge had claimed aother victim. [http://groups.google.com/group/beginning-rails/browse_thread/thread/c6f0a57966669e90 This] gave us the answer and resulted in us issing the command `ruby plugin install svn://errtheblog.com/svn/plugins/classic_pagination` .... only to be told it was already installed :(
+After a little Googling it turns out that being on the bleeding edge had claimed aother victim. [http://groups.google.com/group/beginning-rails/browse_thread/thread/c6f0a57966669e90 This] gave us the answer and resulted in us issuing the command `ruby plugin install svn://errtheblog.com/svn/plugins/classic_pagination` .... only to be told it was already installed :(
 
-Some more Googling got us to [http://www.nabble.com/installing-pagination-problem--td14702572.html this] little beauty.... aaaagggghhhh, seems everything that as in the old memory banks from the online tutorials was slowly becoming worthless :(  Time for a beer and another day...
+Some more Googling got us to [http://www.nabble.com/installing-pagination-problem--td14702572.html this] little beauty.... aaaagggghhhh, seems everything that was in the old memory banks from the online tutorials was slowly becoming worthless :(  Time for a beer and another day...
+
+===Day2===
+Decided to check out the logs file. Yikes!
+{{{
+WARNING: You're using the Ruby-based MySQL library that ships with Rails. This library is not suited for production. Please install the C-based MySQL library instead (gem install mysql).
+  [4;36;1mSQL (0.043000)[0m   [0;1mSET SQL_AUTO_IS_NULL=0[0m
+
+}}}
+Wow an error (well a warning actually) that tells us how to fix it, cool :)
+{{{
+gem install mysql
+}}}
+and the issue was never logged again, hoorah.
+
+Next, having been clobbered so many times so early on living on the bleeding edge, we took time out to [http://fairleads.blogspot.com/2007/12/rails-20-and-scaffolding-step-by-step.html read up] on the changes from v1.n to v2.n in attempt to avoid further frustration.
+
+As a result of this, we decided to start again (!) as we had done so little and wanted to make sure we understood what we had taken on board... so ggodby applicatin folder and databse, nice knowing you....not.
+
+
+=Idiots guide to building an application with Ruby/Rails, aka avoding the pitfalls of out of date tutorials and negating the need for much Googling!=
+Create an application framework by issuing the command
+{{{
+rails name_of_application
+}}}
+Get ready to do some work
+{{{
+cd name_of_application
+}}}
+Get you dev/tes/prod databases ready by editing the `\name_of_application\config\database.yml` file and then issuing the command
+{{{
+rake db:create:all
+}}}
+Fire up the inbuilt weberserver by commanding
+{{{
+ruby script/server
+}}}
+and point your browser at `http://localhost:3000` to see it working.
+
+Hey pesto, so far so good.
