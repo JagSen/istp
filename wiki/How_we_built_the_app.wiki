@@ -229,6 +229,6 @@ created a file to which we would add the raw data `counterparties.yml` in this n
 {{{
 ruby script/generate migration load_counterparties_data
 }}}
-and populated the the counterparties.yml with our sample data. 
+and populated the the counterparties.yml with our sample data. Finallymodify the `\istp\db\migrate\20080826010018_load_counterparties_data.rb` file to make use of this data come load time.
 
 Bed time, propper job to do do tomorow :(
