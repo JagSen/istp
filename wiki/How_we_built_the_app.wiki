@@ -209,7 +209,7 @@ Note to self, learn about doccumenting the aplication using `rake doc:app` the r
 
 Now we have a link between a trade and a counterparty we should enforce that relationship to prevent a trade been entered with a counterpart we do not know about.  This is done in the model
 
-Other model validations include translating database restrictions into Ruby/Rails - no point stressing the db if we know it will fail :
+Other model validations include translating database restrictions into Ruby/Rails - no point stressing the db if we know it will fail (but we will enfore in the db as wll incase someone trys to fiddle through the backend)
 {{{
 NOT NULL - validates_presence_of (including belongs_to associations)
 Numbers - validates_numericality_of (including :only_integer => true)
@@ -217,3 +217,18 @@ String lengths - validates_length_of
 Single-column unique indexes - validates_uniqueness_of
 Multi-column unique indexes -validates_uniqueness_of with scope
 }}}
+I found a [http://blog.hasmanythrough.com/2007/7/14/validate-your-existence word of caution] on Google search re validates_associated - it works on the in-memory AR object only, never checks witht he db.  This explained why I could commit a trade record with a counterparty_id I had not yet set up after seemingly setting up validation to prevent it.  Luckily Josh Susser came up with a work around as described in detail on this link, and validates_existence_of DOES check the database.
+
+A quick install of this little add-on and a restart of the server, sorted.
+
+Having created a couple of counterparties it felt right to store this potentially useful sample data in case we wanted to scrub the database and start again, so we created a folder to hold the data to be loaded
+{{{
+\istp\db\migrate\data
+}}}
+created a file to which we would add the raw data `counterparties.yml` in this new folder, and ran the migration
+{{{
+ruby script/generate migration load_counterparties_data
+}}}
+and populated the the counterparties.yml with our sample data. 
+
+Bed time, propper job to do do tomorow :(
