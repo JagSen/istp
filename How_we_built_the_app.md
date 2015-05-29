@@ -1,0 +1,234 @@
+# How we built iSTP #
+## Introduction ##
+
+iSTP was used to learn how to write scalable applications.  This page records for the future how we got from nowhere to somewhere!
+
+
+## Details ##
+
+Having installed Apache, MySQL, Ruby, Rail we were ready to begin building the application.
+
+Build the project skeleton by issuing the command `rails iSTP`
+
+Now we have the skeleton its time to give it a heartbeat so we started the Ruby server by going to the newly created iSTP folder that just got created and issued the command `ruby script/server`
+
+Simple! We were on our way :)  To prove it worked and Ruby on Rails was playing nice we pointed our browser at [http://localhost:3000](http://localhost:3000) to do the 'hello world' type test.
+
+Now we could kick off a little coding.  As we want to keep the server running we had to open up another command window; we went to the script sub-folder inside our nice new iSTP folder and issued the command `ruby generate controller istp`
+
+We had to add 3 lines of code to one of the files this generated in order to do the real hello world test.... editing \istp\app\controllers\istp\_controller.rb and adding
+```
+def index
+  render :text => "Hello World"
+end 
+```
+Now pointing our browser to [http://localhost:3000/trades](http://localhost:3000/trades) produce the desired simple output :)
+
+Re edit \istp\app\controllers\istp\_controller.rb and reomve the render line as we know everything is working just fine.
+
+Next came a simple template test.  We created a file called `index.rhtml` under the already created folder of `\istp\app\views\istp\` which contained nothing accept the desired `\istp` response.
+
+Having done this and seen it working, we no longer need the other 2 lines we created in the `istp_controller.rb ` file!
+
+Next we set up the link to the MySql database. This turned outto be the mot typing we had to do in the early stages!  This is because the default install provides a template for SQLite rather than MySql. So we edited the exisiting `\istp\config\database.yml` file by trashing what was there and d eplacing it with
+```
+# MySql version 5.x
+#   gem install sqlite3-ruby (not necessary on OS X Leopard)
+development:
+  adapter: mysql
+  database: istp_dev
+  host: localhost
+  username: root
+  password:
+
+# Warning: The database defined as "test" will be erased and
+# re-generated from your development database when you run "rake".
+# Do not set this db to the same as development or production.
+test:
+  adapter: mysql
+  database: istp_test
+  host: localhost
+  username: root
+  password:
+
+production:
+  adapter: mysql
+  database: istp_prod
+  host: localhost
+  username: root
+  password:
+```
+
+Having told the application how to get to the database we thought we best create it so using a MySql manipulation tool we entered `CREATE DATABASE ````istp_dev````` ;``
+
+The books tell you take it easy at this stage and create one table and a couple of fields; we talk half their advice with a single table, but then through it out the window and created 10 fields!
+
+```
+ CREATE TABLE `istp_dev`.`trade` (
+`trade_id` BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+`trade_date` DATE NOT NULL ,
+`counterparty_id` MEDIUMINT NOT NULL ,
+`buy_sell_ind` VARCHAR( 1 ) NOT NULL ,
+`nominal_qty` DECIMAL( 7 ) NOT NULL ,
+`instrument_id` MEDIUMINT NOT NULL ,
+`price` DECIMAL(10,6) NOT NULL ,
+`value_date` DATE NOT NULL ,
+`entry_time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+`entry_user_id` MEDIUMINT NOT NULL
+) ENGINE = MYISAM ;
+```
+
+At this stage Ruby/Rails knows knothing of the database structure so we send it on a fact finding mission by saying `ruby generate model trade` which resulted in a few more files being automatically created - so little work and so many files already :)
+
+Restart the server process on cmd session 1.
+
+Now we are are in a position to use the next RAD part of Ruby/Rails called SCAFFOLD.  This will build for us a VERY quick trade insert form for proof on concpet.
+To do this edit the file `\istp\app\controllers\istp_controller.rb` again, this time adding the command `scaffold :post`
+
+Wanting to see the New Post functionality appear in our web browser, off we went to try it out.
+
+Hmmm, **BANG** she blew :(  What was wrong? Doh, the workmen hadn't delivered the scaffolding so we weren't in a position to use it! Back in our second cmd prompt we issued a call to go and get the necessary goods `ruby plugin install scaffolding` and restarted the server again.
+
+Ready for a big smile on our faces we were again disappointed to see `undefined method ````paginate'`` error when refreshing our browser.  This wasn't at all expected - no mention of it in the tutorials observed that gave us the idea to try this programming route in the first place :(
+
+After a little Googling it turns out that being on the bleeding edge had claimed aother victim. [This](http://groups.google.com/group/beginning-rails/browse_thread/thread/c6f0a57966669e90) gave us the answer and resulted in us issuing the command `ruby plugin install svn://errtheblog.com/svn/plugins/classic_pagination` .... only to be told it was already installed :(
+
+Some more Googling got us to [this](http://www.nabble.com/installing-pagination-problem--td14702572.html) little beauty.... aaaagggghhhh, seems everything that was in the old memory banks from the online tutorials was slowly becoming worthless :(  Time for a beer and another day...
+
+### Day2 ###
+Decided to check out the logs file. Yikes!
+```
+WARNING: You're using the Ruby-based MySQL library that ships with Rails. This library is not suited for production. Please install the C-based MySQL library instead (gem install mysql).
+  [4;36;1mSQL (0.043000)[0m   [0;1mSET SQL_AUTO_IS_NULL=0[0m
+
+```
+Wow an error (well a warning actually) that tells us how to fix it, cool :)
+```
+gem install mysql
+```
+and the issue was never logged again, hoorah.
+
+Next, having been clobbered so many times so early on living on the bleeding edge, we took time out to [read up](http://fairleads.blogspot.com/2007/12/rails-20-and-scaffolding-step-by-step.html) on the changes from v1.n to v2.n in attempt to avoid further frustration.
+
+As a result of this, we decided to start again (!) as we had done so little and wanted to make sure we understood what we had taken on board... so goodby applicatin folder and databse, nice knowing you....not.
+
+
+# Idiots guide to building an application with Ruby/Rails, aka avoding the pitfalls of out of date tutorials and negating the need for much Googling! #
+Create an application framework by issuing the command
+```
+rails -d mysql name_of_application
+```
+Note since v2.n its advisable to specify the -d database type option
+
+
+Get ready to do some work
+```
+cd name_of_application
+```
+Get you dev/test/prod databases ready by editing the `\name_of_application\config\database.yml` file and then issuing the command
+```
+rake db:create:all
+```
+Fire up the inbuilt weberserver by commanding
+```
+ruby script/server
+```
+and point your browser at `http://localhost:3000` to see it working.
+
+Hey pesto, so far so good.
+
+Now, rather than building the database outside of Ruby/Rails and telling it oabout it, as of v2 we describe it in Ruby/Rail and get it to build it for us.  For those used to using gui tools to build the databse, this can seem a bit log winded, but we'll forgive it for now.
+
+To start to build the holder of data for our trade form we command
+```
+ruby script/generate scaffold trade trade_id:bigint trade_date:date counterparty_id:mediumint
+```
+
+Note this time, we followed advise, started simple, and only added a few fields... as the old tutorials tell us, you can build eaily on success later!
+
+Ruby/Rails has created `\name_of_application\db\migrate\20080825122105_create_trades.rb` so now we are in a position (if we wanted) to distribute the release knowing that as well as the application, we can confidently get users to build the database structure too.
+
+To prove it works, we can then apply this script and see it in the database schema
+```
+rake db:migrate
+```
+
+Oh bugger, we screwed up again.
+```
+== 20080825122105 CreateTrades: migrating =====================================
+-- create_table(:trades)
+rake aborted!
+undefined method `bigint' for #<ActiveRecord::ConnectionAdapters::TableDefinition:0x4d65b24>
+```
+
+Seems our bigint knowledge from mysql world screwed us up on the Ruby/Rails world (I guess the mediumint would do the same)... we'll work on that more later, for now we'll make do with an integer.  We don't know any better so modify the `\name_of_application\db\migrate\20080825122105_create_trades.rb` file directly (probably not advisable, but hey, we learning) and run `rake` again.
+
+et viola
+
+Note to self, [this](http://dizzy.co.uk/ruby_on_rails/cheatsheets/rails-migrations) documents the field types which can be used in the db creation script.
+
+So now we return to add some simple validation by editing `\name_of_application\app\models\trade.rb` and adding
+```
+validates_presence_of :trade_id
+validates_presence_of :trade_date
+validates_presence_of :counterparty_id
+```
+
+This could have been done in one line like `validates_presence_of :trade_id, :trade_date, :counterparty_id` but I think its easier to read as it is.
+
+Happened to look at the table hat the rake process created... another mistake.  If you learn from your errors we are dong a whole lot of learning today.  I recall that v1.n automatically creates an ID field to ensure uniqure records are used in the CRUD queries...so we don't need the trade\_id field.
+
+Again, an edit to the `\name_of_application\db\migrate\20080825122105_create_trades.rb` file to remove this unnecessary field, and a modification of the `\app\models\trade.rb` file to remove the requirement for data to be passed.
+
+We then need to get our database in shape so we go back to where we started
+```
+rake db:migrate VERSION=0
+```
+and then rebuild
+```
+rake db:migrate
+```
+and we are sorted, phew.
+
+Except we are not out of the woods.... Ruby/Rails was helpful to us earlier and set up the defualt views of our data... and that included a field called trade\_id... which we just removed... so now all our forms error when we try and commit an action, like adding a record.  So we manually edit the views in `\app\views\trades` and take the time to remove the delete option - this is finance, you can't just go destroying the evidence! Yeah I know we need to be able to cancel a trade booked in error, but we can come to that later.  I was very tempted to remove the edit option at this stage for similar audit concerns, but we'll let it go for now.
+
+Having got the basics working, adding new records, displaying our records, editing our records it's time to create another table.  Given that we have a trade table with counterparty\_id in it, it would make sense add to add the counterparty table, views, models etc. don't you think?
+
+```
+ruby script/generate scaffold counterparty name_long:string name_medium:string name_short:string
+```
+and rake the ground to actually see something grow from these seeds, i.e the physical table creation in the database
+```
+rake db:migrate
+```
+
+Hopefully this was all a bit smoother than our first trade effort
+
+
+Note to self, learn about doccumenting the aplication using `rake doc:app` the results of which can be accessed through`\istp\doc\app\index.html`
+
+Now we have a link between a trade and a counterparty we should enforce that relationship to prevent a trade been entered with a counterpart we do not know about.  This is done in the model
+
+Other model validations include translating database restrictions into Ruby/Rails - no point stressing the db if we know it will fail (but we will enfore in the db as wll incase someone trys to fiddle through the backend)
+```
+NOT NULL - validates_presence_of (including belongs_to associations)
+Numbers - validates_numericality_of (including :only_integer => true)
+String lengths - validates_length_of
+Single-column unique indexes - validates_uniqueness_of
+Multi-column unique indexes -validates_uniqueness_of with scope
+```
+I found a [word of caution](http://blog.hasmanythrough.com/2007/7/14/validate-your-existence) on Google search re validates\_associated - it works on the in-memory AR object only, never checks witht he db.  This explained why I could commit a trade record with a counterparty\_id I had not yet set up after seemingly setting up validation to prevent it.  Luckily Josh Susser came up with a work around as described in detail on this link, and validates\_existence\_of DOES check the database.
+
+A quick install of this little add-on and a restart of the server, sorted.
+
+Having created a couple of counterparties it felt right to store this potentially useful sample data in case we wanted to scrub the database and start again, so we created a folder to hold the data to be loaded
+```
+\istp\db\migrate\data
+```
+created a file to which we would add the raw data `counterparties.yml` in this new folder, and ran the migration
+```
+ruby script/generate migration load_counterparties_data
+```
+and populated the the counterparties.yml with our sample data. Finallymodify the `\istp\db\migrate\20080826010018_load_counterparties_data.rb` file to make use of this data come load time.
+
+Bed time, propper job to do do tomorow :(
